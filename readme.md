@@ -195,7 +195,98 @@ When javascript is enabled, it will do the request, and change the content, othe
 
 Its always a good idea to show the user what is happening, so we'll show a loading message when we're going to a different page. You're free to add some fancy animation later :)
 
-(code)
+## base.html ##
+
+    {% load static %}
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>Website Example</title>
+    
+            <link rel="stylesheet" href="{% static 'style.css' %}" />
+            <script type="text/javascript" src="{% static 'main.js' %}"></script>
+        </head>
+    <body>
+        <ul>
+            <li><a class="MenuItem" href="{% url 'page1' %}">Page 1</a></li>
+            <li><a class="MenuItem" href="{% url 'page2' %}">Page 2</a></li>
+        </ul>
+    
+        <div id="Content">{% block content %}{% endblock %}</div>
+        <div id="Loading" class="hidden">Loading..</div>
+    </body>
+    </html>
+
+Add a link to the stylesheet file for some styling of the loading element, and add the loading element itself.
+
+## style.css ##
+
+    #Loading {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .hidden {
+        display: none;
+    }
+
+Position the loading element on the center of the screen.
+We'll show/hide the element by setting or clearing the `hidden` class.
+
+## main.js ##
+
+    function menuClick( event )
+    {
+        // left click, load with ajax
+        // else, let the <a> element do its thing
+    if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
+        {
+        return;
+        }
+    
+        // show the loading element
+    var loading = document.getElementById( 'Loading' );
+    loading.classList.remove( 'hidden' );
+    
+    var menuItem = this;
+    var request = new XMLHttpRequest();
+        
+    request.open( 'GET', menuItem.getAttribute( 'href' ), true );
+    request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
+    request.onload = function( event )
+        {
+        if ( request.readyState === 4 )
+            {
+            if ( request.status === 200 )
+                {
+                var content = document.getElementById( 'Content' );
+                    
+                content.innerHTML = request.responseText;
+                document.body.scrollTop = 0;
+                }
+                
+            else
+                {
+                console.log( 'Error:', request.statusText );
+                }
+    
+            loading.classList.add( 'hidden' );
+            }
+        };
+    request.onerror = function( event )
+        {
+        console.log( 'Error:', request.statusText );
+        loading.classList.add( 'hidden' );
+        };
+    request.send();
+        
+    event.stopPropagation();
+    event.preventDefault();
+    }
+
+We remove the `hidden` class from the loading element to show it during the loading, and once its all done we simply re-add it. 
 
 # History #
 

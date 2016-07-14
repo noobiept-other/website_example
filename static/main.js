@@ -18,6 +18,10 @@ if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
     return;
     }
 
+    // show the loading element
+var loading = document.getElementById( 'Loading' );
+loading.classList.remove( 'hidden' );
+
 var menuItem = this;
 var request = new XMLHttpRequest();
     
@@ -39,11 +43,14 @@ request.onload = function( event )
             {
             console.log( 'Error:', request.statusText );
             }
+
+        loading.classList.add( 'hidden' );
         }
     };
 request.onerror = function( event )
     {
     console.log( 'Error:', request.statusText );
+    loading.classList.add( 'hidden' );
     };
 request.send();
     
