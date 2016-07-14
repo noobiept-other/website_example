@@ -11,8 +11,6 @@ for (var a = 0 ; a < menuItems.length ; a++)
 
 function menuClick( event )
 {
-var menuItem = this;
-    
     // left click, load with ajax
     // else, let the <a> element do its thing
 if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
@@ -20,6 +18,7 @@ if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
     return;
     }
 
+var menuItem = this;
 var request = new XMLHttpRequest();
     
 request.open( 'GET', menuItem.getAttribute( 'href' ), true );
