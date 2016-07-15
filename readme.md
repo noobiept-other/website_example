@@ -64,11 +64,11 @@ We'll start by writing a normal website first. This will serve as the foundation
 A very basic website. Two pages, and a menu to change between them. Can't get easier than this.
 
 
-# Ajax Backend #
+# Prepare Backend for Async #
 
 Now, lets prepare the backend. It needs to be able to send either the whole page, or just the content.
 
-Since we can't have an `extends` tag inside a `if` in django template, we'll add a new base template for ajax requests.
+We'll want to be able to choose whether to extend the `base.html` or not. Since we can't have an `extends` tag inside a `if` in a django template, we'll add a new base template for ajax requests instead.
 
 ## views.py ##
 
@@ -108,9 +108,9 @@ Since we can't have an `extends` tag inside a `if` in django template, we'll add
 
 So, when its a normal request, page1 and page2 extend the normal `base.html`. Otherwise they extend the `base_ajax.html` which is simply the page's content.
 
-# Ajax Frontend #
+# Front-end #
 
-Alright now, lets do the front-end part. We'll use the `XMLHttpRequest` object to make the request for the content of the new page, then change the content once that is done, all with javascript.
+Alright, now lets do the front-end part. We'll use the `XMLHttpRequest` object to make the request for the content of the new page, then change the content once that is done, all with javascript.
 
 ## base.html ##
 
@@ -204,7 +204,7 @@ When javascript is enabled, it will do the request, and change the content with 
 
 # Loading Element #
 
-Its always a good idea to show the user what is happening, so we'll show a loading message when we're going to a different page. You're free to add some fancy animation later :)
+Its always a good idea to show the user what is happening, so we'll show a loading message when we're going to a different page. You're free to add some fancy animation instead :)
 
 ## base.html ##
 
@@ -294,7 +294,7 @@ We remove the `hidden` class from the loading element to show it during the load
 
 # History #
 
-Alright, almost there, now what is missing is updating the url/history. Right now if we switch between the pages, the url isn't updated nor the browsing history, so if the user wants to go back, it won't go as expected.
+We're almost there, now what is missing is updating the url/history. Right now if we switch between the pages, the url isn't updated nor the browsing history, so if the user wants to go back, it won't go as expected.
 
 To fix this, we'll need to set the history ourselves, with the [history API](https://developer.mozilla.org/en-US/docs/Web/API/History_API).
 
@@ -350,5 +350,4 @@ When the page is initially loaded, the history doesn't have the state in the for
 
 That's it! We've done it! We have a website that works with ajax requests if javascript is enabled, works with `<a>` elements if it isn't. Gets the history updated as expected, so going back/forward is available to use.
 
-Here's a link to the code (bitbucket) and live (heroku link).
 Thanks for reading!
