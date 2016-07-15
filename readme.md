@@ -4,13 +4,13 @@ It will be a website with only 2 pages (keeping it simple to be easier to read),
 
 We'll build the website incrementally, adding functionality one at a time.
 
-I assume the reader has some basic knowledge of django and javascript, so I won't be explaining all of it. If interested go through the official [django tutorial](https://docs.djangoproject.com/en/1.9/intro/tutorial01/).
+I assume the reader has some basic knowledge of django and javascript, so I won't be explaining all of it. For a more  thorough example, check the official [django tutorial](https://docs.djangoproject.com/en/1.9/intro/tutorial01/).
 
 
 # Basic Website #
 
-First, lets just write a normal website, gotta start at the beginning.
-The ajax is only a compliment to an already existing working website.
+We'll start by writing a normal website first. This will serve as the foundation for the rest of the work.
+
 
 ## views.py ##
 
@@ -61,12 +61,14 @@ The ajax is only a compliment to an already existing working website.
     
     {% block content %}Page 2{% endblock %}
 
-Basic website, 2 pages, a menu to change between the 2. Can't get easier than this.
+A very basic website. Two pages, and a menu to change between them. Can't get easier than this.
+
 
 # Ajax Backend #
 
 Now, lets prepare the backend. It needs to be able to send either the whole page, or just the content.
-Since we can't if/else an `extends` in django, we'll add a new base template for ajax requests.
+
+Since we can't have an `extends` tag inside a `if` in django template, we'll add a new base template for ajax requests.
 
 ## views.py ##
 
@@ -104,9 +106,9 @@ Since we can't if/else an `extends` in django, we'll add a new base template for
     
     {% block content %}Page 2{% endblock %}
 
-So, when its a normal request, page1 and page2 extend the normal `base.html`. Otherwise they extend the `base_ajax.html` which is simply the pages content.
+So, when its a normal request, page1 and page2 extend the normal `base.html`. Otherwise they extend the `base_ajax.html` which is simply the page's content.
 
-# XMLHttpRequest - front end part #
+# Ajax Frontend #
 
 Alright now, lets do the front-end part. We'll use the `XMLHttpRequest` object to make the request for the content of the new page, then change the content once that is done, all with javascript.
 
@@ -136,6 +138,7 @@ We added the `main.js` script, and a class name to the menu items, and id to the
 
     window.onload = function()
     {
+        // set the menu event listeners
     var menuItems = document.querySelectorAll( '.MenuItem' );
         
     for (var a = 0 ; a < menuItems.length ; a++)
@@ -147,17 +150,25 @@ We added the `main.js` script, and a class name to the menu items, and id to the
     
     function menuClick( event )
     {
-        // left click, load with ajax
-        // else, let the <a> element do its thing
+        // load the page with ajax on left click
+        // otherwise let the <a> element do its thing
     if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
         {
         return;
         }
     
     var menuItem = this;
+    var url = menuItem.getAttribute( 'href' );
+    
+    loadPageAjax( url );
+    }
+    
+    
+    function loadPageAjax( url )
+    {
     var request = new XMLHttpRequest();
         
-    request.open( 'GET', menuItem.getAttribute( 'href' ), true );
+    request.open( 'GET', url, true );
     request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
     request.onload = function( event )
         {
@@ -187,11 +198,11 @@ We added the `main.js` script, and a class name to the menu items, and id to the
     event.preventDefault();
     }
 
-We set a click listener to all the menu elements. In there we override the normal behavior of the `<a>` element and do the request ourselves with the `XMLHttpRequest`. Once that is done, its just a matter of changing the content and we're done! Make sure you set the `X-Requested-With` header to `XMLHttpRequest` so that the server can differentiate between the different kinds of requests.
+We set a click listener to all the menu elements. In there we override the normal behavior of the `<a>` element and do the request ourselves with the `XMLHttpRequest`. Once that is done, its just a matter of changing the content and we're done! Make sure you set the `X-Requested-With` header to `XMLHttpRequest` so that the server can differentiate between the different kind of requests.
 
-When javascript is enabled, it will do the request, and change the content, otherwise it will reload the whole page (by clicking on the `<a>` element).
+When javascript is enabled, it will do the request, and change the content with ajax, otherwise it will reload the whole page (by clicking on the `<a>` element), so it works regardless.
 
-# Loading element #
+# Loading Element #
 
 Its always a good idea to show the user what is happening, so we'll show a loading message when we're going to a different page. You're free to add some fancy animation later :)
 
@@ -233,27 +244,19 @@ Add a link to the stylesheet file for some styling of the loading element, and a
     }
 
 Position the loading element on the center of the screen.
-We'll show/hide the element by setting or clearing the `hidden` class.
+We'll show/hide the element by removing/adding the `hidden` class.
 
 ## main.js ##
 
-    function menuClick( event )
+    function loadPageAjax( url )
     {
-        // left click, load with ajax
-        // else, let the <a> element do its thing
-    if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
-        {
-        return;
-        }
-    
         // show the loading element
     var loading = document.getElementById( 'Loading' );
     loading.classList.remove( 'hidden' );
     
-    var menuItem = this;
     var request = new XMLHttpRequest();
         
-    request.open( 'GET', menuItem.getAttribute( 'href' ), true );
+    request.open( 'GET', url, true );
     request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
     request.onload = function( event )
         {
@@ -286,6 +289,7 @@ We'll show/hide the element by setting or clearing the `hidden` class.
     event.preventDefault();
     }
 
+
 We remove the `hidden` class from the loading element to show it during the loading, and once its all done we simply re-add it. 
 
 # History #
@@ -294,7 +298,54 @@ Alright, almost there, now what is missing is updating the url/history. Right no
 
 To fix this, we'll need to set the history ourselves, with the [history API](https://developer.mozilla.org/en-US/docs/Web/API/History_API).
 
-(code here)
+## main.js ##
+
+    window.onload = function()
+    {
+        // set the menu event listeners
+    var menuItems = document.querySelectorAll( '.MenuItem' );
+        
+    for (var a = 0 ; a < menuItems.length ; a++)
+        {
+        menuItems[ a ].addEventListener( 'click', menuClick );
+        }
+    
+    var url = window.location.href;
+    
+        // update state of the current history entry with the url
+    window.history.replaceState( url, document.title, url );
+    
+        // is called when the history changes (going back/forward)
+    window.addEventListener( 'popstate', function( event )
+        {
+        loadPageAjax( event.state );
+        });
+    };
+    
+    
+    function menuClick( event )
+    {
+        // left click, load with ajax
+        // else, let the <a> element do its thing
+    if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
+        {
+        return;
+        }
+    
+    var menuItem = this;
+    var url = menuItem.getAttribute( 'href' );
+    
+        // add to history
+    window.history.pushState( url, menuItem.textContent, url );
+    
+    loadPageAjax( url );
+    }
+
+When we load a new page with ajax, we add a new state to the history, with the url that we changed to.
+
+When the history is changed (for example when clicking `back` on the browser), the `popstate` is triggered and we load the page based on the given saved state.
+
+When the page is initially loaded, the history doesn't have the state in the format we're using, so use the `history.replaceState()` to update it, so it all works as expected.
 
 
 That's it! We've done it! We have a website that works with ajax requests if javascript is enabled, works with `<a>` elements if it isn't. Gets the history updated as expected, so going back/forward is available to use.
