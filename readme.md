@@ -348,6 +348,6 @@ When the history is changed (for example when clicking `back` on the browser), t
 When the page is initially loaded, the history doesn't have the state in the format we're using, so use the `history.replaceState()` to update it, so it all works as expected.
 
 
-That's it! We've done it! We have a website that works with ajax requests if javascript is enabled, works with `<a>` elements if it isn't. Gets the history updated as expected, so going back/forward is available to use.
+That's it! We've done it! We have a website that works with ajax requests if javascript is enabled, works with `<a>` elements if it isn't. Gets the history updated as expected, so going back/forward is available to use. The code is available in this repository, if you want to try it out (click on `source` on the left menu).
 
 Thanks for reading!
