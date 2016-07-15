@@ -1,11 +1,23 @@
 window.onload = function()
 {
+    // set the menu event listeners
 var menuItems = document.querySelectorAll( '.MenuItem' );
     
 for (var a = 0 ; a < menuItems.length ; a++)
     {
     menuItems[ a ].addEventListener( 'click', menuClick );
     }
+
+var url = window.location.href;
+
+    // update state of the current history entry with the url
+window.history.replaceState( url, document.title, url );
+
+    // is called when the history changes (going back/forward)
+window.addEventListener( 'popstate', function( event )
+    {
+    loadPageAjax( event.state );
+    });
 };
 
 
@@ -18,14 +30,25 @@ if ( event.button !== 0 || event.ctrlKey || event.shiftKey )
     return;
     }
 
+var menuItem = this;
+var url = menuItem.getAttribute( 'href' );
+
+    // add to history
+window.history.pushState( url, menuItem.textContent, url );
+
+loadPageAjax( url );
+}
+
+
+function loadPageAjax( url )
+{
     // show the loading element
 var loading = document.getElementById( 'Loading' );
 loading.classList.remove( 'hidden' );
 
-var menuItem = this;
 var request = new XMLHttpRequest();
     
-request.open( 'GET', menuItem.getAttribute( 'href' ), true );
+request.open( 'GET', url, true );
 request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
 request.onload = function( event )
     {
