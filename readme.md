@@ -15,10 +15,10 @@ We'll start by writing a normal website first. This will serve as the foundation
 ## views.py ##
 
     from django.shortcuts import render
-    
+
     def page1( request ):
         return render( request, 'page1.html' )
-    
+
     def page2( request ):
         return render( request, 'page2.html' )
 
@@ -26,7 +26,7 @@ We'll start by writing a normal website first. This will serve as the foundation
 
     from django.conf.urls import url
     from website import views
-    
+
     urlpatterns = [
         url( r'^$', views.page1, name= 'page1' ),
         url( r'^page2$', views.page2, name= 'page2' ),
@@ -44,7 +44,7 @@ We'll start by writing a normal website first. This will serve as the foundation
             <li><a href="{% url 'page1' %}">Page 1</a></li>
             <li><a href="{% url 'page2' %}">Page 2</a></li>
         </ul>
-    
+
         {% block content %}{% endblock %}
     </body>
     </html>
@@ -52,13 +52,13 @@ We'll start by writing a normal website first. This will serve as the foundation
 ## page1.html ##
 
     {% extends "base.html" %}
-    
+
     {% block content %}Page 1{% endblock %}
 
 ## page2.html ##
 
     {% extends "base.html" %}
-    
+
     {% block content %}Page 2{% endblock %}
 
 A very basic website. Two pages, and a menu to change between them. Can't get easier than this.
@@ -73,21 +73,21 @@ We'll want to be able to choose whether to extend the `base.html` or not. Since 
 ## views.py ##
 
     from django.shortcuts import render
-    
+
     BASE_AJAX = 'base_ajax.html'
-    
+
     def page1( request ):
         context = {}
         if request.is_ajax():
             context[ 'base' ] = BASE_AJAX
-    
+
         return render( request, 'page1.html', context )
-    
+
     def page2( request ):
         context = {}
         if request.is_ajax():
             context[ 'base' ] = BASE_AJAX
-    
+
         return render( request, 'page2.html', context )
 
 ## base_ajax.html ##
@@ -97,13 +97,13 @@ We'll want to be able to choose whether to extend the `base.html` or not. Since 
 ## page1.html ##
 
     {% extends base|default:"base.html" %}
-    
+
     {% block content %}Page 1{% endblock %}
 
 ## page2.html ##
 
     {% extends base|default:"base.html" %}
-    
+
     {% block content %}Page 2{% endblock %}
 
 So, when its a normal request, page1 and page2 extend the normal `base.html`. Otherwise they extend the `base_ajax.html` which is simply the page's content.
@@ -126,9 +126,9 @@ Alright, now lets do the front-end part. We'll use the `XMLHttpRequest` object t
             <li><a class="MenuItem" href="{% url 'page1' %}">Page 1</a></li>
             <li><a class="MenuItem" href="{% url 'page2' %}">Page 2</a></li>
         </ul>
-    
+
         <div id="Content">{% block content %}{% endblock %}</div>
-    
+
     </body>
     </html>
 
@@ -140,14 +140,14 @@ We added the `main.js` script, and a class name to the menu items, and id to the
     {
         // set the menu event listeners
     var menuItems = document.querySelectorAll( '.MenuItem' );
-        
+
     for (var a = 0 ; a < menuItems.length ; a++)
         {
         menuItems[ a ].addEventListener( 'click', menuClick );
         }
     };
-    
-    
+
+
     function menuClick( event )
     {
         // load the page with ajax on left click
@@ -156,18 +156,21 @@ We added the `main.js` script, and a class name to the menu items, and id to the
         {
         return;
         }
-    
+
     var menuItem = this;
     var url = menuItem.getAttribute( 'href' );
-    
+
     loadPageAjax( url );
+
+    event.stopPropagation();
+    event.preventDefault();
     }
-    
-    
+
+
     function loadPageAjax( url )
     {
     var request = new XMLHttpRequest();
-        
+
     request.open( 'GET', url, true );
     request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
     request.onload = function( event )
@@ -177,11 +180,11 @@ We added the `main.js` script, and a class name to the menu items, and id to the
             if ( request.status === 200 )
                 {
                 var content = document.getElementById( 'Content' );
-                    
+
                 content.innerHTML = request.responseText;
                 document.body.scrollTop = 0;
                 }
-                
+
             else
                 {
                 console.log( 'Error:', request.statusText );
@@ -193,9 +196,6 @@ We added the `main.js` script, and a class name to the menu items, and id to the
         console.log( 'Error:', request.statusText );
         };
     request.send();
-        
-    event.stopPropagation();
-    event.preventDefault();
     }
 
 We set a click listener to all the menu elements. In there we override the normal behavior of the `<a>` element and do the request ourselves with the `XMLHttpRequest`. Once that is done, its just a matter of changing the content and we're done! Make sure you set the `X-Requested-With` header to `XMLHttpRequest` so that the server can differentiate between the different kind of requests.
@@ -213,7 +213,7 @@ Its always a good idea to show the user what is happening, so we'll show a loadi
     <html>
         <head>
             <title>Website Example</title>
-    
+
             <link rel="stylesheet" href="{% static 'style.css' %}" />
             <script type="text/javascript" src="{% static 'main.js' %}"></script>
         </head>
@@ -222,7 +222,7 @@ Its always a good idea to show the user what is happening, so we'll show a loadi
             <li><a class="MenuItem" href="{% url 'page1' %}">Page 1</a></li>
             <li><a class="MenuItem" href="{% url 'page2' %}">Page 2</a></li>
         </ul>
-    
+
         <div id="Content">{% block content %}{% endblock %}</div>
         <div id="Loading" class="hidden">Loading..</div>
     </body>
@@ -238,7 +238,7 @@ Add a link to the stylesheet file for some styling of the loading element, and a
         top: 50%;
         transform: translate(-50%, -50%);
     }
-    
+
     .hidden {
         display: none;
     }
@@ -253,9 +253,9 @@ We'll show/hide the element by removing/adding the `hidden` class.
         // show the loading element
     var loading = document.getElementById( 'Loading' );
     loading.classList.remove( 'hidden' );
-    
+
     var request = new XMLHttpRequest();
-        
+
     request.open( 'GET', url, true );
     request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
     request.onload = function( event )
@@ -265,16 +265,16 @@ We'll show/hide the element by removing/adding the `hidden` class.
             if ( request.status === 200 )
                 {
                 var content = document.getElementById( 'Content' );
-                    
+
                 content.innerHTML = request.responseText;
                 document.body.scrollTop = 0;
                 }
-                
+
             else
                 {
                 console.log( 'Error:', request.statusText );
                 }
-    
+
             loading.classList.add( 'hidden' );
             }
         };
@@ -284,13 +284,10 @@ We'll show/hide the element by removing/adding the `hidden` class.
         loading.classList.add( 'hidden' );
         };
     request.send();
-        
-    event.stopPropagation();
-    event.preventDefault();
     }
 
 
-We remove the `hidden` class from the loading element to show it during the loading, and once its all done we simply re-add it. 
+We remove the `hidden` class from the loading element to show it during the loading, and once its all done we simply re-add it.
 
 # History #
 
@@ -304,25 +301,25 @@ To fix this, we'll need to set the history ourselves, with the [history API](htt
     {
         // set the menu event listeners
     var menuItems = document.querySelectorAll( '.MenuItem' );
-        
+
     for (var a = 0 ; a < menuItems.length ; a++)
         {
         menuItems[ a ].addEventListener( 'click', menuClick );
         }
-    
+
     var url = window.location.href;
-    
+
         // update state of the current history entry with the url
     window.history.replaceState( url, document.title, url );
-    
+
         // is called when the history changes (going back/forward)
     window.addEventListener( 'popstate', function( event )
         {
         loadPageAjax( event.state );
         });
     };
-    
-    
+
+
     function menuClick( event )
     {
         // left click, load with ajax
@@ -331,14 +328,17 @@ To fix this, we'll need to set the history ourselves, with the [history API](htt
         {
         return;
         }
-    
+
     var menuItem = this;
     var url = menuItem.getAttribute( 'href' );
-    
+
         // add to history
     window.history.pushState( url, menuItem.textContent, url );
-    
+
     loadPageAjax( url );
+
+    event.stopPropagation();
+    event.preventDefault();
     }
 
 When we load a new page with ajax, we add a new state to the history, with the url that we changed to.

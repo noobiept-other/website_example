@@ -2,7 +2,7 @@ window.onload = function()
 {
     // set the menu event listeners
 var menuItems = document.querySelectorAll( '.MenuItem' );
-    
+
 for (var a = 0 ; a < menuItems.length ; a++)
     {
     menuItems[ a ].addEventListener( 'click', menuClick );
@@ -37,6 +37,34 @@ var url = menuItem.getAttribute( 'href' );
 window.history.pushState( url, menuItem.textContent, url );
 
 loadPageAjax( url );
+
+event.stopPropagation();
+event.preventDefault();
+}
+
+
+function loadPageAjaxFetch( url )
+{
+var loading = document.getElementById( 'Loading' );
+loading.classList.remove( 'hidden' );
+
+var headers = new Headers();
+headers.append( 'X-Requested-With', 'XMLHttpRequest' );
+
+fetch( url, { headers: headers } )
+    .then( function( response ) {
+
+        return response.text();
+
+    }).then( function( response ) {
+
+        var content = document.getElementById( 'Content' );
+
+        content.innerHTML = response;
+        document.body.scrollTop = 0;
+
+        loading.classList.add( 'hidden' );
+    });
 }
 
 
@@ -47,7 +75,7 @@ var loading = document.getElementById( 'Loading' );
 loading.classList.remove( 'hidden' );
 
 var request = new XMLHttpRequest();
-    
+
 request.open( 'GET', url, true );
 request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
 request.onload = function( event )
@@ -57,11 +85,11 @@ request.onload = function( event )
         if ( request.status === 200 )
             {
             var content = document.getElementById( 'Content' );
-                
+
             content.innerHTML = request.responseText;
             document.body.scrollTop = 0;
             }
-            
+
         else
             {
             console.log( 'Error:', request.statusText );
@@ -76,7 +104,4 @@ request.onerror = function( event )
     loading.classList.add( 'hidden' );
     };
 request.send();
-    
-event.stopPropagation();
-event.preventDefault();
 }
