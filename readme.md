@@ -68,7 +68,7 @@ A very basic website. Two pages, and a menu to change between them. Can't get ea
 
 Now, lets prepare the backend. It needs to be able to send either the whole page, or just the content.
 
-We'll want to be able to choose whether to extend the `base.html` or not. Since we can't have an `extends` tag inside a `if` in a django template, we'll add a new base template for ajax requests instead.
+The easier way would be to have the `extends` tag in a `if` condition. Unfortunately django doesn't support that, so instead what we'll do is have a separate base template for each situation.
 
 ## urls.py ##
 
