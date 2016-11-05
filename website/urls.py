@@ -19,4 +19,7 @@ from website import views
 urlpatterns = [
     url( r'^$', views.page1, name= 'page1' ),
     url( r'^page2$', views.page2, name= 'page2' ),
+
+    url( r'^content/$', views.page1, name= 'page1_content' ),
+    url( r'^content/page2$', views.page2, name= 'page2_content' ),
 ]

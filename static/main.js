@@ -8,7 +8,7 @@ for (var a = 0 ; a < menuItems.length ; a++)
     menuItems[ a ].addEventListener( 'click', menuClick );
     }
 
-var url = window.location.href;
+var url = window.location.pathname;
 
     // update state of the current history entry with the url
 window.history.replaceState( url, document.title, url );
@@ -51,7 +51,7 @@ loading.classList.remove( 'hidden' );
 var headers = new Headers();
 headers.append( 'X-Requested-With', 'XMLHttpRequest' );
 
-fetch( url, { headers: headers } )
+fetch( '/content' + url, { headers: headers } )
     .then( function( response ) {
 
         return response.text();
@@ -76,7 +76,7 @@ loading.classList.remove( 'hidden' );
 
 var request = new XMLHttpRequest();
 
-request.open( 'GET', url, true );
+request.open( 'GET', '/content' + url, true );
 request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
 request.onload = function( event )
     {

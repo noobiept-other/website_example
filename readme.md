@@ -70,6 +70,21 @@ Now, lets prepare the backend. It needs to be able to send either the whole page
 
 We'll want to be able to choose whether to extend the `base.html` or not. Since we can't have an `extends` tag inside a `if` in a django template, we'll add a new base template for ajax requests instead.
 
+## urls.py ##
+
+    from django.conf.urls import url
+    from website import views
+    
+    urlpatterns = [
+        url( r'^$', views.page1, name= 'page1' ),
+        url( r'^page2$', views.page2, name= 'page2' ),
+    
+        url( r'^content/$', views.page1, name= 'page1_content' ),
+        url( r'^content/page2$', views.page2, name= 'page2_content' ),
+    ]
+
+We have a separate url for either the full page or just the content.
+
 ## views.py ##
 
     from django.shortcuts import render
@@ -90,9 +105,13 @@ We'll want to be able to choose whether to extend the `base.html` or not. Since 
 
         return render( request, 'page2.html', context )
 
+We'll have a different base template, depending on whether we got an ajax request or not.
+
 ## base_ajax.html ##
 
     {% block content %}{% endblock %}
+
+Just need the page content, so a simple block is all that is required.
 
 ## page1.html ##
 
@@ -171,7 +190,7 @@ We added the `main.js` script, and a class name to the menu items, and id to the
     {
     var request = new XMLHttpRequest();
 
-    request.open( 'GET', url, true );
+    request.open( 'GET', '/content' + url, true );
     request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
     request.onload = function( event )
         {
@@ -256,7 +275,7 @@ We'll show/hide the element by removing/adding the `hidden` class.
 
     var request = new XMLHttpRequest();
 
-    request.open( 'GET', url, true );
+    request.open( 'GET', '/content' + url, true );
     request.setRequestHeader( 'X-Requested-With', 'XMLHttpRequest' );
     request.onload = function( event )
         {
@@ -307,7 +326,7 @@ To fix this, we'll need to set the history ourselves, with the [history API](htt
         menuItems[ a ].addEventListener( 'click', menuClick );
         }
 
-    var url = window.location.href;
+    var url = window.location.pathname;
 
         // update state of the current history entry with the url
     window.history.replaceState( url, document.title, url );
