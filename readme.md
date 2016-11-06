@@ -74,11 +74,11 @@ The easier way would be to have the `extends` tag in a `if` condition. Unfortuna
 
     from django.conf.urls import url
     from website import views
-    
+
     urlpatterns = [
         url( r'^$', views.page1, name= 'page1' ),
         url( r'^page2$', views.page2, name= 'page2' ),
-    
+
         url( r'^content/$', views.page1, name= 'page1_content' ),
         url( r'^content/page2$', views.page2, name= 'page2_content' ),
     ]
@@ -326,7 +326,7 @@ To fix this, we'll need to set the history ourselves, with the [history API](htt
         menuItems[ a ].addEventListener( 'click', menuClick );
         }
 
-    var url = window.location.pathname;
+    var url = window.location.pathname + window.location.search;
 
         // update state of the current history entry with the url
     window.history.replaceState( url, document.title, url );

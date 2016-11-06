@@ -8,7 +8,7 @@ for (var a = 0 ; a < menuItems.length ; a++)
     menuItems[ a ].addEventListener( 'click', menuClick );
     }
 
-var url = window.location.pathname;
+var url = window.location.pathname + window.location.search;
 
     // update state of the current history entry with the url
 window.history.replaceState( url, document.title, url );
